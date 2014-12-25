@@ -19,6 +19,7 @@ parser.add_argument('action', choices=[
     EPIC_NEXT_RELEASE,
     EPIC_NEXT_HOTFIX
 ])
+parser.add_argument('-v', action='store', dest='version')
 
 
 base_url = "https://www.pivotaltracker.com/services/v5"
@@ -130,18 +131,20 @@ def get_latest_version():
     return latest_version
 
 
-def create_next_hotfix_epic():
+def create_hotfix_epic(version=None):
     """Create an epic for the next hotfix"""
-    latest_version = get_latest_version()
-    hotfix_version = bump_hotfix(latest_version)
-    create_version_epic(hotfix_version)
+    if version is None:
+        latest_version = get_latest_version()
+        version = bump_hotfix(latest_version)
+    create_version_epic(version)
 
 
-def create_next_release_epic():
+def create_release_epic(version=None):
     """Create an epic for the next release"""
-    latest_version = get_latest_version()
-    release_version = bump_release(latest_version)
-    create_version_epic(release_version)
+    if version is None:
+        latest_version = get_latest_version()
+        version = bump_release(latest_version)
+    create_version_epic(version)
 
 
 def create_release_story(version):
@@ -165,7 +168,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.action == EPIC_NEXT_RELEASE:
-        create_next_release_epic()
+        create_release_epic(args.version)
 
     elif args.action == EPIC_NEXT_HOTFIX:
-        create_next_hotfix_epic()
+        create_hotfix_epic(args.version)
