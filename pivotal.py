@@ -12,14 +12,17 @@ from settings import (
 # Possible command-line actions
 EPIC_NEXT_HOTFIX = 'epic_next_hotfix'
 EPIC_NEXT_RELEASE = 'epic_next_release'
+VERSIONIFY_STORY = 'versionify_story'
 
 # Handle arguments
 parser = argparse.ArgumentParser(description='Automate some pivotal tasks.')
 parser.add_argument('action', choices=[
     EPIC_NEXT_RELEASE,
-    EPIC_NEXT_HOTFIX
+    EPIC_NEXT_HOTFIX,
+    VERSIONIFY_STORY
 ])
 parser.add_argument('-v', action='store', dest='version')
+parser.add_argument('-story', action='store', dest='story_id')
 
 
 base_url = "https://www.pivotaltracker.com/services/v5"
@@ -164,8 +167,22 @@ def create_release_story(version):
     return response
 
 
+def versionify_story(story_id, version):
+    """Add a versoin to a story"""
+    labels_url = '{}/{}/labels'.format(stories_url, story_id)
+    data = {
+        'name': 'v{}'.format(version)
+    }
+
+    response = requests.post(labels_url, data=json.dumps(data), headers=PIVOTAL_HEADERS)
+
+    return response
+
 if __name__ == "__main__":
     args = parser.parse_args()
+
+    if args.action == VERSIONIFY_STORY:
+        versionify_story(args.story_id, args.version)
 
     if args.action == EPIC_NEXT_RELEASE:
         create_release_epic(args.version)
